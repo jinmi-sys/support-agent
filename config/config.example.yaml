@@ -1,0 +1,67 @@
+# Support Agent Configuration
+# Copy to config.yaml and customize
+
+mimo:
+  api_key: "${MIMO_API_KEY}"
+  model: "MiMo-V2.5-Pro"
+  base_url: "https://api.mimo.xiaomi.com/v1"
+  max_tokens: 4096
+  temperature: 0.3
+
+knowledge:
+  embedding_model: "text-embedding-3-small"
+  chunk_size: 512
+  top_k: 5
+  sources:
+    - type: "file"
+      path: "knowledge_base/"
+    - type: "url"
+      urls:
+        - "https://docs.example.com/api"
+
+channels:
+  email:
+    imap_host: "imap.gmail.com"
+    imap_port: 993
+    smtp_host: "smtp.gmail.com"
+    smtp_port: 587
+    user: "${EMAIL_USER}"
+    password: "${EMAIL_PASSWORD}"
+    poll_interval: 30
+
+  chat:
+    websocket_url: "${CHAT_WEBSOCKET_URL}"
+    reconnect_interval: 5
+
+  discord:
+    token: "${DISCORD_BOT_TOKEN}"
+    support_channel_id: ""
+    guild_id: ""
+
+database:
+  url: "${DATABASE_URL}"
+  pool_size: 10
+
+redis:
+  url: "${REDIS_URL}"
+
+logging:
+  level: "INFO"
+  format: "json"
+
+metrics:
+  enabled: true
+  retention_days: 90
+
+sla:
+  P0: 3600      # 1 hour in seconds
+  P1: 14400     # 4 hours
+  P2: 86400     # 24 hours
+  P3: 259200    # 72 hours
+
+escalation:
+  auto_escalate: true
+  notify_on_escalation: true
+  escalation_channels:
+    - "slack"
+    - "email"

@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "support-agent"
+version = "1.0.0"
+description = "AI-powered autonomous customer support agent using Xiaomi MiMo-V2.5-Pro"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+authors = [
+    {name = "jinmi-sys"},
+]
+keywords = ["ai", "support", "agent", "mimo", "customer-support", "automation"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "httpx>=0.27.0",
+    "pydantic>=2.5.0",
+    "pyyaml>=6.0.1",
+    "structlog>=24.1.0",
+    "redis>=5.0.0",
+    "asyncpg>=0.29.0",
+    "numpy>=1.26.0",
+    "tiktoken>=0.5.0",
+    "click>=8.1.0",
+    "rich>=13.7.0",
+    "uvicorn>=0.27.0",
+    "fastapi>=0.109.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.1.0",
+    "ruff>=0.2.0",
+    "mypy>=1.8.0",
+]
+
+[project.scripts]
+support-agent = "support_agent.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.mypy]
+python_version = "3.11"
+strict = true

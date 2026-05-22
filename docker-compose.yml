@@ -1,0 +1,65 @@
+version: "3.9"
+
+services:
+  support-agent:
+    build: .
+    container_name: support-agent
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./config:/app/config
+      - ./knowledge_base:/app/knowledge_base
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - support-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: support-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - support-net
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: support-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: support_agent
+      POSTGRES_USER: support_agent
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U support_agent"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - support-net
+
+volumes:
+  redis-data:
+  postgres-data:
+
+networks:
+  support-net:
+    driver: bridge
