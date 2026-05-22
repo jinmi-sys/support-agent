@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Support Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#060a10;--card:#0c1018;--glass:rgba(12,16,24,.65);--glass-border:rgba(34,211,238,.12);--accent-start:#06b6d4;--accent-mid:#0891b2;--accent-end:#22d3ee;--accent-glow:rgba(6,182,212,.35);--text:#e2e8f0;--text-dim:#94a3b8;--text-bright:#f8fafc;--green:#22c55e;--red:#ef4444;--yellow:#eab308;--orange:#f97316;--purple:#a78bfa}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden;position:relative}
+canvas#particles{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.mono{font-family:'JetBrains Mono',monospace}
+a{color:inherit;text-decoration:none}
+
+/* Nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;transition:background .3s,backdrop-filter .3s}
+nav.scrolled{background:rgba(6,10,16,.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--glass-border)}
+.nav-logo{font-weight:700;font-size:1.1rem;display:flex;align-items:center;gap:.5rem}
+.nav-logo span{background:linear-gradient(135deg,var(--accent-start),var(--accent-end));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-links{display:flex;align-items:center;gap:2rem;font-size:.875rem;color:var(--text-dim)}
+.nav-links a:hover{color:var(--text-bright)}
+.nav-links .btn-source{padding:.5rem 1rem;border:1px solid var(--glass-border);border-radius:6px;font-size:.8rem;color:var(--accent-end);transition:all .3s}
+.nav-links .btn-source:hover{background:rgba(6,182,212,.12);border-color:var(--accent-start)}
+@media(max-width:768px){.nav-links a:not(.btn-source){display:none}}
+
+/* Hero */
+.hero{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem 1rem}
+.hero-badge{display:inline-block;padding:.4rem 1.2rem;border:1px solid var(--glass-border);border-radius:100px;font-size:.7rem;font-weight:600;letter-spacing:.15em;color:var(--accent-end);background:var(--glass);backdrop-filter:blur(10px);margin-bottom:2rem}
+.hero h1{font-size:clamp(2.5rem,8vw,5.5rem);font-weight:700;line-height:1.05;margin-bottom:1.5rem;background:linear-gradient(135deg,#fff 0%,var(--accent-start) 40%,var(--accent-mid) 70%,var(--accent-end) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:clamp(1rem,2vw,1.35rem);color:var(--text-dim);max-width:620px;margin-bottom:2.5rem}
+.hero-btns{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center}
+.btn-primary{padding:.85rem 2rem;background:linear-gradient(135deg,var(--accent-start),var(--accent-mid));border:none;border-radius:8px;color:#fff;font-weight:600;font-size:.95rem;cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px var(--accent-glow)}
+.btn-ghost{padding:.85rem 2rem;background:transparent;border:1px solid var(--glass-border);border-radius:8px;color:var(--text);font-weight:500;font-size:.95rem;cursor:pointer;transition:all .3s}
+.btn-ghost:hover{border-color:var(--accent-start);background:rgba(6,182,212,.06)}
+
+/* Stats */
+.stats{position:relative;z-index:2;max-width:1100px;margin:-4rem auto 0;padding:0 1rem;display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+.stat-card{background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:12px;padding:1.5rem;text-align:center;transition:all .3s}
+.stat-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(6,182,212,.12)}
+.stat-value{font-family:'JetBrains Mono',monospace;font-size:1.8rem;font-weight:600;color:var(--text-bright)}
+.stat-label{font-size:.8rem;color:var(--text-dim);margin-top:.25rem}
+.stat-change{font-size:.75rem;margin-top:.4rem;font-weight:500}
+.stat-change.up{color:var(--green)}.stat-change.down{color:var(--red)}
+@media(max-width:768px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+/* Sections */
+section{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:5rem 1rem}
+.section-title{font-size:clamp(1.5rem,3vw,2.2rem);font-weight:700;margin-bottom:.75rem}
+.section-sub{color:var(--text-dim);font-size:1rem;margin-bottom:3rem;max-width:520px}
+
+/* Capabilities */
+.cap-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.cap-card{background:var(--glass);backdrop-filter:blur(16px);border:1px solid var(--glass-border);border-radius:12px;padding:2rem 1.5rem;transition:all .35s;position:relative;overflow:hidden}
+.cap-card::before{content:'';position:absolute;inset:-1px;border-radius:12px;padding:1px;background:linear-gradient(135deg,transparent,var(--accent-start),transparent);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity .35s}
+.cap-card:hover::before{opacity:1}
+.cap-card:hover{transform:translateY(-6px);box-shadow:0 16px 48px rgba(6,182,212,.1)}
+.cap-icon{font-size:1.8rem;margin-bottom:1rem}
+.cap-card h3{font-size:1.05rem;margin-bottom:.5rem;color:var(--text-bright)}
+.cap-card p{font-size:.85rem;color:var(--text-dim);line-height:1.5}
+@media(max-width:768px){.cap-grid{grid-template-columns:1fr}}
+
+/* Dashboard */
+.dash-layout{display:grid;grid-template-columns:1.2fr .8fr;gap:1.5rem;margin-bottom:2rem}
+.dash-panel{background:var(--glass);backdrop-filter:blur(16px);border:1px solid var(--glass-border);border-radius:12px;padding:1.5rem}
+.dash-panel h3{font-size:.9rem;color:var(--text-dim);margin-bottom:1rem;font-weight:500}
+
+/* Ticket feed */
+.ticket-feed{display:flex;flex-direction:column;gap:.65rem}
+.ticket-row{display:flex;align-items:center;gap:.75rem;padding:.6rem .75rem;background:rgba(255,255,255,.02);border-radius:8px;font-size:.8rem;transition:background .2s}
+.ticket-row:hover{background:rgba(6,182,212,.04)}
+.ticket-priority{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ticket-priority.critical{background:var(--red);box-shadow:0 0 8px var(--red)}
+.ticket-priority.high{background:var(--orange);box-shadow:0 0 8px var(--orange)}
+.ticket-priority.medium{background:var(--yellow);box-shadow:0 0 6px var(--yellow)}
+.ticket-priority.low{background:var(--green);box-shadow:0 0 6px var(--green)}
+.ticket-subject{flex:1;font-weight:500;color:var(--text-bright);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ticket-platform{font-size:.7rem;color:var(--accent-end);padding:.2rem .5rem;border:1px solid var(--glass-border);border-radius:4px}
+.ticket-time{font-size:.7rem;color:var(--text-dim);font-family:'JetBrains Mono',monospace}
+
+/* Chat preview */
+.chat-window{display:flex;flex-direction:column;gap:.75rem;max-height:320px;overflow:hidden}
+.chat-msg{display:flex;gap:.75rem;align-items:flex-start}
+.chat-avatar{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:600}
+.chat-avatar.user{background:rgba(167,139,250,.15);color:var(--purple)}
+.chat-avatar.agent{background:rgba(6,182,212,.15);color:var(--accent-end)}
+.chat-bubble{padding:.6rem .9rem;border-radius:10px;font-size:.82rem;line-height:1.5;max-width:85%}
+.chat-bubble.user{background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.15)}
+.chat-bubble.agent{background:rgba(6,182,212,.06);border:1px solid var(--glass-border)}
+.chat-bubble .typing-dots{display:flex;gap:4px;padding:2px 0}
+.chat-bubble .typing-dots span{width:6px;height:6px;border-radius:50%;background:var(--accent-end);animation:bounce .6s infinite alternate}
+.chat-bubble .typing-dots span:nth-child(2){animation-delay:.2s}
+.chat-bubble .typing-dots span:nth-child(3){animation-delay:.4s}
+
+/* Resolution chart */
+.chart-area{height:140px;display:flex;align-items:flex-end;gap:6px;padding-top:1rem}
+.chart-bar{flex:1;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--accent-start),var(--accent-mid));transition:height .6s cubic-bezier(.4,0,.2,1);position:relative;min-height:4px}
+.chart-bar:hover{box-shadow:0 0 12px var(--accent-glow)}
+.chart-labels{display:flex;gap:6px;margin-top:.5rem}
+.chart-labels span{flex:1;text-align:center;font-size:.6rem;color:var(--text-dim);font-family:'JetBrains Mono',monospace}
+
+/* Pipeline */
+.pipeline{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-top:1rem}
+.pipe-step{background:rgba(255,255,255,.02);border-radius:8px;padding:1rem;text-align:center;border:1px solid transparent;transition:all .3s}
+.pipe-step.active{border-color:var(--accent-start);background:rgba(6,182,212,.04)}
+.pipe-step .pipe-num{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:600;color:var(--accent-end)}
+.pipe-step .pipe-label{font-size:.7rem;color:var(--text-dim);margin-top:.25rem}
+.pipe-step .pipe-stat{font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--text-bright);margin-top:.35rem}
+
+/* Confidence meter */
+.confidence-wrap{margin-top:1rem}
+.confidence-bar{height:8px;border-radius:4px;background:rgba(255,255,255,.06);overflow:hidden;position:relative}
+.confidence-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--red),var(--yellow),var(--green));transition:width 1s cubic-bezier(.4,0,.2,1)}
+.confidence-labels{display:flex;justify-content:space-between;margin-top:.4rem;font-size:.65rem;color:var(--text-dim);font-family:'JetBrains Mono',monospace}
+
+/* Architecture */
+.arch-flow{display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap;margin-top:2rem}
+.arch-node{background:var(--glass);backdrop-filter:blur(16px);border:1px solid var(--glass-border);border-radius:10px;padding:1rem 1.5rem;text-align:center;min-width:120px;transition:all .3s}
+.arch-node:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(6,182,212,.1)}
+.arch-node .arch-icon{font-size:1.5rem;margin-bottom:.4rem}
+.arch-node .arch-name{font-size:.8rem;font-weight:600;color:var(--text-bright)}
+.arch-node .arch-desc{font-size:.65rem;color:var(--text-dim);margin-top:.2rem}
+.arch-arrow{color:var(--accent-end);font-size:1.2rem;opacity:.5}
+@media(max-width:768px){.arch-flow{flex-direction:column}.arch-arrow{transform:rotate(90deg)}}
+
+/* Integrations */
+.int-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+.int-card{background:var(--glass);backdrop-filter:blur(16px);border:1px solid var(--glass-border);border-radius:10px;padding:1.2rem;text-align:center;transition:all .3s}
+.int-card:hover{transform:translateY(-3px);border-color:var(--accent-start)}
+.int-card .int-icon{font-size:2rem;margin-bottom:.5rem}
+.int-card .int-name{font-size:.85rem;font-weight:600;color:var(--text-bright)}
+.int-card .int-desc{font-size:.7rem;color:var(--text-dim);margin-top:.25rem}
+@media(max-width:768px){.int-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* CTA */
+.cta{text-align:center;padding:6rem 1rem}
+.cta h2{font-size:clamp(1.8rem,4vw,3rem);font-weight:700;margin-bottom:1rem;background:linear-gradient(135deg,#fff,var(--accent-end));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.cta p{color:var(--text-dim);max-width:500px;margin:0 auto 2rem}
+
+/* Footer */
+footer{position:relative;z-index:1;text-align:center;padding:2rem 1rem;font-size:.75rem;color:var(--text-dim);border-top:1px solid var(--glass-border);max-width:1100px;margin:0 auto}
+
+/* Animations */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes bounce{to{transform:translateY(-4px)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{opacity:0;transform:translateY(20px);transition:all .6s cubic-bezier(.4,0,.2,1)}.fade-up.visible{opacity:1;transform:translateY(0)}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:rgba(6,182,212,.3);border-radius:3px}
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<nav id="nav">
+  <div class="nav-logo"><span>Support Agent</span></div>
+  <div class="nav-links">
+    <a href="#capabilities">Features</a>
+    <a href="#dashboard">Dashboard</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#integrations">Integrations</a>
+    <a href="https://github.com/jinmi-sys/support-agent" class="btn-source">Source</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-badge">AI-POWERED CUSTOMER SUPPORT</div>
+  <h1>Support Agent</h1>
+  <p>Multi-platform customer support agent powered by MiMo-V2.5-Pro. Reads your docs, understands context, drafts accurate replies, and escalates only when confidence is low.</p>
+  <div class="hero-btns">
+    <button class="btn-primary" onclick="document.getElementById('dashboard').scrollIntoView({behavior:'smooth'})">View Dashboard</button>
+    <button class="btn-ghost" onclick="window.open('https://github.com/jinmi-sys/support-agent')">GitHub Repo</button>
+  </div>
+</section>
+
+<div class="stats">
+  <div class="stat-card fade-up">
+    <div class="stat-value mono">94.2%</div>
+    <div class="stat-label">Auto-Resolved</div>
+    <div class="stat-change up">+3.1% vs last week</div>
+  </div>
+  <div class="stat-card fade-up">
+    <div class="stat-value mono">1.8s</div>
+    <div class="stat-label">Avg Response Time</div>
+    <div class="stat-change up">-0.4s improvement</div>
+  </div>
+  <div class="stat-card fade-up">
+    <div class="stat-value mono">12,847</div>
+    <div class="stat-label">Tickets This Month</div>
+    <div class="stat-change up">+18% volume handled</div>
+  </div>
+  <div class="stat-card fade-up">
+    <div class="stat-value mono">4.8/5</div>
+    <div class="stat-label">CSAT Score</div>
+    <div class="stat-change up">+0.3 from baseline</div>
+  </div>
+</div>
+
+<section id="capabilities">
+  <div class="section-title">Capabilities</div>
+  <div class="section-sub">End-to-end ticket resolution with MiMo's 1M context window holding entire knowledge bases in memory.</div>
+  <div class="cap-grid">
+    <div class="cap-card fade-up">
+      <div class="cap-icon">&#x1F4DA;</div>
+      <h3>Knowledge Ingestion</h3>
+      <p>Indexes docs, FAQs, and internal wikis. MiMo holds the full knowledge base in context, no RAG retrieval gaps.</p>
+    </div>
+    <div class="cap-card fade-up">
+      <div class="cap-icon">&#x1F4AC;</div>
+      <h3>Contextual Replies</h3>
+      <p>Understands ticket history, user sentiment, and product context. Drafts human-like responses, not template copy-paste.</p>
+    </div>
+    <div class="cap-card fade-up">
+      <div class="cap-icon">&#x26A0;&#xFE0F;</div>
+      <h3>Smart Escalation</h3>
+      <p>When confidence drops below threshold, escalates to human agents with full context summary and suggested actions.</p>
+    </div>
+    <div class="cap-card fade-up">
+      <div class="cap-icon">&#x1F310;</div>
+      <h3>Multi-Platform</h3>
+      <p>Handles tickets from Slack, Discord, Telegram, email, and web chat from a single unified pipeline.</p>
+    </div>
+    <div class="cap-card fade-up">
+      <div class="cap-icon">&#x1F4CA;</div>
+      <h3>Sentiment Analysis</h3>
+      <p>Detects frustration, urgency, and tone shifts. Adjusts response style accordingly, empathetic when needed.</p>
+    </div>
+    <div class="cap-card fade-up">
+      <div class="cap-icon">&#x1F504;</div>
+      <h3>Continuous Learning</h3>
+      <p>Logs resolutions, tracks CSAT feedback, and refines response patterns over time without retraining.</p>
+    </div>
+  </div>
+</section>
+
+<section id="dashboard">
+  <div class="section-title">Live Dashboard</div>
+  <div class="section-sub">Real-time ticket monitoring, resolution pipeline, and confidence tracking.</div>
+
+  <div class="dash-layout">
+    <div class="dash-panel">
+      <h3>Active Ticket Queue</h3>
+      <div class="ticket-feed">
+        <div class="ticket-row">
+          <div class="ticket-priority critical"></div>
+          <div class="ticket-subject">Payment failed but amount deducted from account</div>
+          <div class="ticket-platform">Email</div>
+          <div class="ticket-time mono">2m ago</div>
+        </div>
+        <div class="ticket-row">
+          <div class="ticket-priority high"></div>
+          <div class="ticket-subject">Cannot export data to CSV, getting 500 error</div>
+          <div class="ticket-platform">Slack</div>
+          <div class="ticket-time mono">5m ago</div>
+        </div>
+        <div class="ticket-row">
+          <div class="ticket-priority medium"></div>
+          <div class="ticket-subject">How to add team members to workspace?</div>
+          <div class="ticket-platform">Discord</div>
+          <div class="ticket-time mono">8m ago</div>
+        </div>
+        <div class="ticket-row">
+          <div class="ticket-priority low"></div>
+          <div class="ticket-subject">Feature request: dark mode for mobile app</div>
+          <div class="ticket-platform">Web</div>
+          <div class="ticket-time mono">12m ago</div>
+        </div>
+        <div class="ticket-row">
+          <div class="ticket-priority medium"></div>
+          <div class="ticket-subject">API rate limit exceeded, need higher tier</div>
+          <div class="ticket-platform">Telegram</div>
+          <div class="ticket-time mono">15m ago</div>
+        </div>
+        <div class="ticket-row">
+          <div class="ticket-priority high"></div>
+          <div class="ticket-subject">SSO login redirect loop on Safari browser</div>
+          <div class="ticket-platform">Email</div>
+          <div class="ticket-time mono">18m ago</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-panel">
+      <h3>AI Resolution Chat</h3>
+      <div class="chat-window">
+        <div class="chat-msg">
+          <div class="chat-avatar user">U</div>
+          <div class="chat-bubble user">I upgraded to Pro but my account still shows Free plan features. Payment went through on Stripe.</div>
+        </div>
+        <div class="chat-msg">
+          <div class="chat-avatar agent">AI</div>
+          <div class="chat-bubble agent">I can see your Stripe payment (txn_3Px8k2) confirmed 4 minutes ago. The plan sync usually takes 1-2 minutes. Let me force a refresh on your account now.</div>
+        </div>
+        <div class="chat-msg">
+          <div class="chat-avatar agent">AI</div>
+          <div class="chat-bubble agent">Done. Your workspace is now on Pro. You should see all Pro features unlocked. Can you refresh and confirm?</div>
+        </div>
+        <div class="chat-msg">
+          <div class="chat-avatar user">U</div>
+          <div class="chat-bubble user">Yep, working now. Thanks!</div>
+        </div>
+        <div class="chat-msg">
+          <div class="chat-avatar agent">AI</div>
+          <div class="chat-bubble agent"><span class="typing-dots"><span></span><span></span><span></span></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-layout">
+    <div class="dash-panel">
+      <h3>Resolution Rate (7 Days)</h3>
+      <div class="chart-area" id="chart"></div>
+      <div class="chart-labels" id="chart-labels"></div>
+    </div>
+
+    <div class="dash-panel">
+      <h3>Resolution Pipeline</h3>
+      <div class="pipeline">
+        <div class="pipe-step active">
+          <div class="pipe-num">1</div>
+          <div class="pipe-label">Receive</div>
+          <div class="pipe-stat mono">12.8k</div>
+        </div>
+        <div class="pipe-step active">
+          <div class="pipe-num">2</div>
+          <div class="pipe-label">Classify</div>
+          <div class="pipe-stat mono">12.8k</div>
+        </div>
+        <div class="pipe-step active">
+          <div class="pipe-num">3</div>
+          <div class="pipe-label">Resolve</div>
+          <div class="pipe-stat mono">12.1k</div>
+        </div>
+        <div class="pipe-step">
+          <div class="pipe-num">4</div>
+          <div class="pipe-label">Escalate</div>
+          <div class="pipe-stat mono">742</div>
+        </div>
+      </div>
+      <div class="confidence-wrap">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+          <span style="font-size:.8rem;color:var(--text-dim)">Avg Confidence Score</span>
+          <span class="mono" style="font-size:.9rem;color:var(--green);font-weight:600">91.3%</span>
+        </div>
+        <div class="confidence-bar">
+          <div class="confidence-fill" style="width:91.3%"></div>
+        </div>
+        <div class="confidence-labels">
+          <span>0%</span>
+          <span>Escalate &lt;70%</span>
+          <span>100%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="architecture">
+  <div class="section-title">Architecture</div>
+  <div class="section-sub">Multi-platform intake, MiMo-powered reasoning, human-in-the-loop escalation.</div>
+  <div class="arch-flow">
+    <div class="arch-node">
+      <div class="arch-icon">&#x1F4E8;</div>
+      <div class="arch-name">Intake</div>
+      <div class="arch-desc">Slack, Discord, Email, Web, Telegram</div>
+    </div>
+    <div class="arch-arrow">&rarr;</div>
+    <div class="arch-node">
+      <div class="arch-icon">&#x1F9E0;</div>
+      <div class="arch-name">Classifier</div>
+      <div class="arch-desc">Intent, urgency, sentiment detection</div>
+    </div>
+    <div class="arch-arrow">&rarr;</div>
+    <div class="arch-node">
+      <div class="arch-icon">&#x26A1;</div>
+      <div class="arch-name">MiMo Engine</div>
+      <div class="arch-desc">1M context, full knowledge base</div>
+    </div>
+    <div class="arch-arrow">&rarr;</div>
+    <div class="arch-node">
+      <div class="arch-icon">&#x2705;</div>
+      <div class="arch-name">Resolver</div>
+      <div class="arch-desc">Draft reply or escalate to human</div>
+    </div>
+  </div>
+</section>
+
+<section id="integrations">
+  <div class="section-title">Platform Integrations</div>
+  <div class="section-sub">One agent, every channel your customers use.</div>
+  <div class="int-grid">
+    <div class="int-card fade-up">
+      <div class="int-icon">&#x1F4AC;</div>
+      <div class="int-name">Slack</div>
+      <div class="int-desc">Thread-aware replies, mention routing</div>
+    </div>
+    <div class="int-card fade-up">
+      <div class="int-icon">&#x1F3AE;</div>
+      <div class="int-name">Discord</div>
+      <div class="int-desc">Server channels, DM support, role-based</div>
+    </div>
+    <div class="int-card fade-up">
+      <div class="int-icon">&#x2709;&#xFE0F;</div>
+      <div class="int-name">Email</div>
+      <div class="int-desc">IMAP/SMTP, thread parsing, auto-reply</div>
+    </div>
+    <div class="int-card fade-up">
+      <div class="int-icon">&#x1F4F1;</div>
+      <div class="int-name">Telegram</div>
+      <div class="int-desc">Bot API, group support, inline queries</div>
+    </div>
+    <div class="int-card fade-up">
+      <div class="int-icon">&#x1F310;</div>
+      <div class="int-name">Web Chat</div>
+      <div class="int-desc">Embeddable widget, real-time streaming</div>
+    </div>
+    <div class="int-card fade-up">
+      <div class="int-icon">&#x1F4CB;</div>
+      <div class="int-name">Zendesk</div>
+      <div class="int-desc">Ticket sync, CSAT integration</div>
+    </div>
+    <div class="int-card fade-up">
+      <div class="int-icon">&#x1F4CA;</div>
+      <div class="int-name">Intercom</div>
+      <div class="int-desc">Conversation handoff, user context</div>
+    </div>
+    <div class="int-card fade-up">
+      <div class="int-icon">&#x1F517;</div>
+      <div class="int-name">REST API</div>
+      <div class="int-desc">Custom integrations, webhooks</div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <h2>Resolve tickets, not just respond</h2>
+  <p>Let AI handle the routine. Your team focuses on what matters.</p>
+  <button class="btn-primary" onclick="window.open('https://github.com/jinmi-sys/support-agent')">Get Started</button>
+</section>
+
+<footer>Support Agent &mdash; Powered by MiMo-V2.5-Pro</footer>
+
+<script>
+// Particles
+const canvas=document.getElementById('particles'),ctx=canvas.getContext('2d');
+let W,H;function resize(){W=canvas.width=innerWidth;H=canvas.height=innerHeight}
+resize();addEventListener('resize',resize);
+const P=Array.from({length:60},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,r:Math.random()*1.5+.5}));
+function drawParticles(){ctx.clearRect(0,0,W,H);P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle='rgba(6,182,212,.25)';ctx.fill()});
+for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){const d=Math.hypot(P[i].x-P[j].x,P[i].y-P[j].y);if(d<150){ctx.beginPath();ctx.moveTo(P[i].x,P[i].y);ctx.lineTo(P[j].x,P[j].y);ctx.strokeStyle=`rgba(6,182,212,${.08*(1-d/150)})`;ctx.stroke()}}
+requestAnimationFrame(drawParticles)}
+drawParticles();
+
+// Nav scroll
+const nav=document.getElementById('nav');
+addEventListener('scroll',()=>{nav.classList.toggle('scrolled',scrollY>50)});
+
+// Fade up observer
+const obs=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}})},{threshold:.15});
+document.querySelectorAll('.fade-up').forEach(el=>obs.observe(el));
+
+// Chart
+const chartData=[87,91,89,94,92,95,94];
+const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const chartEl=document.getElementById('chart');
+const labelsEl=document.getElementById('chart-labels');
+chartData.forEach((v,i)=>{
+  const bar=document.createElement('div');
+  bar.className='chart-bar';
+  bar.style.height='0%';
+  bar.title=days[i]+': '+v+'%';
+  chartEl.appendChild(bar);
+  const lbl=document.createElement('span');
+  lbl.textContent=days[i];
+  labelsEl.appendChild(lbl);
+  setTimeout(()=>{bar.style.height=v+'%'},200+i*100);
+});
+</script>
+</body>
+</html>
